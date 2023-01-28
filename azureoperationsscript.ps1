@@ -1,15 +1,20 @@
 [CmdletBinding()]
 param (
     $OrganizationUrl,
-    $PAT
+    $PAT,
+    $OrganizationName
 )
 
 $orgUrl = $OrganizationUrl
 $pat = $PAT
 
-# Get the list of all the organization in project
+# Create header with PAT
+$token = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes(":$($pat)"))
+$header = @{authorization = "Basic $token"}
+
+
+# Get the list of all projects in the organization
 $projectsUrl = "$OrganizationUrl/_apis/projects?api-version=5.1"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $projects = Invoke-RestMethod -Uri $projectsUrl -Method Get -ContentType "application/json" -Headers $header
 $projects.value | ForEach-Object {
    Write-Host $_.id $_.name
